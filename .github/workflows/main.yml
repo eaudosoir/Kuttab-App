@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Original Kuttab APK
 
 on:
   push:
@@ -13,12 +13,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Extract Kuttab ZIP
-        run: |
-          unzip -o Kuttab.zip -d temp_extracted
-          PROJECT_DIR=$(find temp_extracted -name "pubspec.yaml" -exec dirname {} \;)
-          cp -r $PROJECT_DIR/* .
-
       - name: Setup Java JDK
         uses: actions/setup-java@v4
         with:
@@ -30,14 +24,20 @@ jobs:
         with:
           channel: 'stable'
 
+      - name: Extract Original Kuttab Project
+        run: |
+          unzip -o Kuttab.zip -d extracted_app
+          PROJ_DIR=$(find extracted_app -name "pubspec.yaml" -exec dirname {} \;)
+          cp -r $PROJ_DIR/* .
+
       - name: Get Dependencies
         run: flutter pub get
 
-      - name: Build APK (Bypassing AGP Check)
+      - name: Build Original APK
         run: flutter build apk --release --android-skip-build-dependency-validation
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: kuttab-release-apk
+          name: kuttab-original-apk
           path: build/app/outputs/flutter-apk/app-release.apk
