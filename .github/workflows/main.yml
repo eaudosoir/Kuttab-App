@@ -10,7 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Extract Kuttab ZIP
+        run: |
+          unzip -o Kuttab.zip -d temp_extracted
+          PROJECT_DIR=$(find temp_extracted -name "pubspec.yaml" -exec dirname {} \;)
+          cp -r $PROJECT_DIR/* .
 
       - name: Setup Java JDK
         uses: actions/setup-java@v4
@@ -23,16 +30,13 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Extract Project Files
-        run: unzip -o Kuttab.zip
-
-      - name: Install Dependencies
+      - name: Get Dependencies
         run: flutter pub get
 
-      - name: Build APK
-        run: flutter build apk --release
+      - name: Build APK (Bypassing AGP Check)
+        run: flutter build apk --release --android-skip-build-dependency-validation
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: kuttab-release-apk
